@@ -64,10 +64,22 @@ function requireLogin(callback) {
   };
 }
 
+// 현재 페이지 깊이 계산 (더 정확한 방식)
+function getPagePrefix() {
+  const path = window.location.pathname;
+
+  // pages/cart/cart.html 같은 경로인지 확인
+  if (path.includes('/pages/')) {
+    return '../../';
+  }
+
+  // index.html 또는 루트
+  return './';
+}
+
 // CSS 로드 - 페이지 위치에 따라 자동 경로 설정
 (function loadCSS() {
-  const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
-  const prefix = depth > 0 ? '../'.repeat(depth) : './';
+  const prefix = getPagePrefix();
   const cssPath = `${prefix}components/layout.css`;
 
   const link = document.createElement("link");
@@ -84,8 +96,7 @@ scheduleAutoLogout();
 async function loadLayout() {
   try {
     // 현재 페이지 위치에 따라 경로 자동 설정
-    const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
-    const prefix = depth > 0 ? '../'.repeat(depth) : './';
+    const prefix = getPagePrefix();
     const layoutPath = `${prefix}components/layout.html`;
 
     const res = await fetch(layoutPath);
@@ -167,8 +178,7 @@ function movePageContentToMain() {
 // header 이벤트 바인딩
 function bindHeaderEvents() {
   // 현재 페이지 위치에 따라 경로 설정
-  const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
-  const prefix = depth > 0 ? '../'.repeat(depth) : './';
+  const prefix = getPagePrefix();
 
   // 장바구니 버튼
   const cartBtn = document.querySelector(
