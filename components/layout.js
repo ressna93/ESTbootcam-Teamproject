@@ -99,8 +99,14 @@ async function loadLayout() {
     const header = doc.querySelector("header");
     const footer = doc.querySelector("footer");
 
-    if (header) document.body.prepend(header);
-    if (footer) document.body.appendChild(footer);
+    // 동적 경로 수정 (depth에 따라)
+    if (header) {
+      fixDynamicPaths(header, prefix);
+      document.body.prepend(header);
+    }
+    if (footer) {
+      document.body.appendChild(footer);
+    }
 
     // 페이지 콘텐츠를 main으로 이동
     movePageContentToMain();
@@ -110,6 +116,40 @@ async function loadLayout() {
   } catch (err) {
     console.error("loadLayout 에러:", err);
   }
+}
+
+// 동적 경로 수정 함수
+function fixDynamicPaths(element, prefix) {
+  // data-dynamic-path 속성을 가진 모든 요소 찾기
+  const dynamicElements = element.querySelectorAll('[data-dynamic-path]');
+
+  dynamicElements.forEach(el => {
+    const pathType = el.getAttribute('data-dynamic-path');
+
+    if (pathType === 'asset') {
+      // 이미지, SVG 아이콘 등 asset 경로 수정
+      if (el.tagName === 'IMG' && el.src) {
+        const originalPath = el.getAttribute('src');
+        if (originalPath.startsWith('./')) {
+          el.setAttribute('src', prefix + originalPath.slice(2));
+        }
+      } else if (el.tagName === 'use' && el.href) {
+        const originalHref = el.getAttribute('href');
+        if (originalHref && originalHref.startsWith('./')) {
+          const parts = originalHref.split('#');
+          el.setAttribute('href', prefix + parts[0].slice(2) + (parts[1] ? '#' + parts[1] : ''));
+        }
+      }
+    } else if (pathType === 'index') {
+      // index.html 링크 수정
+      if (el.tagName === 'A' && el.href) {
+        const originalHref = el.getAttribute('href');
+        if (originalHref === './index.html') {
+          el.setAttribute('href', prefix + 'index.html');
+        }
+      }
+    }
+  });
 }
 
 // 페이지 콘텐츠를 main 안으로 이동
@@ -126,6 +166,10 @@ function movePageContentToMain() {
 
 // header 이벤트 바인딩
 function bindHeaderEvents() {
+  // 현재 페이지 위치에 따라 경로 설정
+  const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
+  const prefix = depth > 0 ? '../'.repeat(depth) : './';
+
   // 장바구니 버튼
   const cartBtn = document.querySelector(
     'header .icon-item[aria-label="장바구니"]'
@@ -134,7 +178,7 @@ function bindHeaderEvents() {
     cartBtn.addEventListener(
       "click",
       requireLogin(() => {
-        window.location.href = "./pages/cart/cart.html";
+        window.location.href = prefix + "pages/cart/cart.html";
       })
     );
   }
@@ -146,9 +190,9 @@ function bindHeaderEvents() {
   if (mypageBtn) {
     mypageBtn.addEventListener("click", () => {
       if (!isLoggedIn()) {
-        window.location.href = "./pages/login/login.html";
+        window.location.href = prefix + "pages/login/login.html";
       } else {
-        window.location.href = "./404.html";
+        window.location.href = prefix + "404.html";
       }
     });
   }
