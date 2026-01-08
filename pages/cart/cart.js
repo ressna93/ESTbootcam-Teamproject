@@ -213,10 +213,18 @@ function createProductCard(item, index) {
     renderCart();
   });
 
-  // 주문하기 버튼
+  // 주문하기 버튼 (단일 상품 주문)
   const orderBtn = card.querySelector(".btn-order");
   orderBtn.addEventListener("click", function () {
-    alert('주문 기능은 로컬 서버에서만 사용 가능합니다.');
+    // 주문 데이터를 sessionStorage에 저장
+    const orderData = [{
+      ...item,
+      order_type: 'direct_order'
+    }];
+    sessionStorage.setItem('orderData', JSON.stringify(orderData));
+
+    // 주문 페이지로 이동
+    window.location.href = '../order/order.html';
   });
 
   // 삭제 버튼
@@ -270,7 +278,18 @@ function updateOrderSummary() {
       alert("주문할 상품을 선택해주세요.");
       return;
     }
-    alert('주문 기능은 로컬 서버에서만 사용 가능합니다.');
+
+    // 선택된 상품들을 주문 데이터로 변환
+    const orderData = checkedItems.map(item => ({
+      ...item,
+      order_type: 'cart_order'
+    }));
+
+    // sessionStorage에 저장
+    sessionStorage.setItem('orderData', JSON.stringify(orderData));
+
+    // 주문 페이지로 이동
+    window.location.href = '../order/order.html';
   };
 }
 

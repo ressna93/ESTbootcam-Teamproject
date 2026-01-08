@@ -184,9 +184,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 바로 구매 버튼
   if (buyBtn) {
-    buyBtn.addEventListener('click', (e) => {
+    buyBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      alert('구매 기능은 로컬 서버에서만 사용 가능합니다.');
+
+      // 상품 정보 가져오기
+      const response = await fetch(getDataPath());
+      const data = await response.json();
+      const product = data.products.find(p => p.id === productId);
+
+      if (!product) {
+        alert('상품 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      // 주문 데이터 생성
+      const orderData = [{
+        id: Date.now(),
+        name: product.name,
+        category: product.seller?.store_name || "일반상품",
+        price: product.price,
+        image: product.image,
+        quantity: quantity,
+        order_type: 'direct_order',
+        productId: product.id
+      }];
+
+      // sessionStorage에 저장
+      sessionStorage.setItem('orderData', JSON.stringify(orderData));
+
+      // 주문 페이지로 이동
+      window.location.href = '../order/order.html';
     });
   }
 
