@@ -64,15 +64,17 @@ function requireLogin(callback) {
   };
 }
 
-// CSS 로드
-loadCSS("./components/layout.css");
+// CSS 로드 - 페이지 위치에 따라 자동 경로 설정
+(function loadCSS() {
+  const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
+  const prefix = depth > 0 ? '../'.repeat(depth) : './';
+  const cssPath = `${prefix}components/layout.css`;
 
-function loadCSS(url) {
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = url;
+  link.href = cssPath;
   document.head.appendChild(link);
-}
+})();
 
 // layout.html 로드 (header + footer)
 loadLayout();
@@ -81,7 +83,12 @@ scheduleAutoLogout();
 
 async function loadLayout() {
   try {
-    const res = await fetch("./components/layout.html");
+    // 현재 페이지 위치에 따라 경로 자동 설정
+    const depth = window.location.pathname.split('/').filter(p => p && !p.includes('.')).length - 1;
+    const prefix = depth > 0 ? '../'.repeat(depth) : './';
+    const layoutPath = `${prefix}components/layout.html`;
+
+    const res = await fetch(layoutPath);
     if (!res.ok) throw new Error("layout.html 로드 실패");
 
     const html = await res.text();
