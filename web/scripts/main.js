@@ -6,7 +6,9 @@ let currentCategory = "all";
 
 // 환경 감지
 const isGitHubPages = window.location.hostname.includes("github.io");
-const BASE_PATH = isGitHubPages ? "/team1-JADUPAGE/web" : "";
+// GitHub Pages 저장소 이름 자동 감지
+const repoName = isGitHubPages ? window.location.pathname.split('/')[1] : '';
+const BASE_PATH = isGitHubPages ? `/${repoName}/web` : "";
 
 // 데이터 경로
 function getDataPath() {

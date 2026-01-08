@@ -9,12 +9,35 @@ const API_CONFIG = {
   // 로컬 개발 환경
   local: 'http://localhost:3000/api',
 
-  // GitHub Pages 배포 환경 - Vercel 백엔드 사용
-  production: 'https://your-backend-api.vercel.app/api',
+  // GitHub Pages 배포 환경 - JSON 파일 직접 사용
+  production: window.location.origin + '/web',  // GitHub Pages에서 JSON 파일 직접 읽기
 
   // 현재 환경에 맞는 API URL 반환
   getBaseURL() {
     return isLocalhost ? this.local : this.production;
+  },
+
+  // GitHub Pages용 - db.json 직접 가져오기
+  async getProducts() {
+    if (isLocalhost) {
+      const response = await fetch(`${this.local}/products`);
+      return response.json();
+    } else {
+      // GitHub Pages에서는 db.json 직접 읽기
+      const response = await fetch(`${this.production}/db.json`);
+      const data = await response.json();
+      return data.products;
+    }
+  },
+
+  // 기타 데이터도 동일하게
+  async getDB() {
+    if (isLocalhost) {
+      return null; // 로컬에서는 API 사용
+    } else {
+      const response = await fetch(`${this.production}/db.json`);
+      return response.json();
+    }
   }
 };
 
