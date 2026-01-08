@@ -41,12 +41,18 @@ async function fetchCartItems() {
       const product = products.find(p => p.id === item.product_id);
       if (!product) return null;
 
+      // 이미지 경로 수정 (./assets -> ../../assets)
+      let imagePath = product.image;
+      if (imagePath && imagePath.startsWith('./')) {
+        imagePath = '../../' + imagePath.slice(2);
+      }
+
       return {
         id: item.id,
         name: product.name,
         category: product.seller?.store_name || "일반상품",
         price: product.price,
-        image: product.image,
+        image: imagePath,
         option: `${product.shipping_method === "PARCEL" ? "택배배송" : "직접배송"} / ${product.shipping_fee === 0 ? "무료배송" : "유료배송"}`,
         quantity: item.quantity,
         checked: true,
